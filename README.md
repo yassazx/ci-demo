@@ -1,4 +1,4 @@
-\*\*# CI-Demo-Node \*\*#
+# CI-Demo-Node #
 
 [![CI](https://github.com/ilyassazetd/ci-demo/actions/workflows/ci.yml/badge.svg)](https://github.com/ilyassazetd/ci-demo/actions/workflows/ci.yml)
 [![Docker Image](https://img.shields.io/docker/pulls/ilyassazetd/ci-demo.svg)](https://hub.docker.com/r/ilyassazetd/ci-demo)
