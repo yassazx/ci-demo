@@ -1,7 +1,5 @@
 # CI-Demo-Node #
 
-[![CI](https://github.com/ilyassazetd/ci-demo/actions/workflows/ci.yml/badge.svg)](https://github.com/ilyassazetd/ci-demo/actions/workflows/ci.yml)
-[![Docker Image](https://img.shields.io/docker/pulls/ilyassazetd/ci-demo.svg)](https://hub.docker.com/r/ilyassazetd/ci-demo)
 
 A lightweight Express.js application demonstrating a fully automated CI/CD pipeline using GitHub Actions and Docker Hub.
 
