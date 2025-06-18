@@ -1,158 +1,152 @@
-# CI Demo Node.js
+# ci-demo
 
-A demonstration of a complete CI/CD pipeline for a simple Node.js Express application using GitHub Actions, Docker, and Docker Hub.
+A simple Node.js Express application demonstrating a full CI/CD pipeline using GitHub Actions and Docker Hub.
 
 ---
 
 ## Table of Contents
 
-* [Project Overview](#project-overview)
+* [Overview](#overview)
 * [Prerequisites](#prerequisites)
-* [Setup & Installation](#setup--installation)
-* [Running Locally](#running-locally)
-* [Dockerization](#dockerization)
-* [Continuous Integration (CI)](#continuous-integration-ci)
-* [Continuous Deployment (CD)](#continuous-deployment-cd)
+* [Getting Started](#getting-started)
+
+  * [Clone & Install](#clone--install)
+  * [Run Locally](#run-locally)
 * [Testing](#testing)
-* [Managing Secrets](#managing-secrets)
-* [Extending the Project](#extending-the-project)
-* [Contributing](#contributing)
-* [License](#license)
+* [Docker](#docker)
+
+  * [Build & Run Locally](#build--run-locally)
+  * [Push to Docker Hub](#push-to-docker-hub)
+* [CI with GitHub Actions](#ci-with-github-actions)
+* [CD with GitHub Actions → Docker Hub](#cd-with-github-actions--docker-hub)
 
 ---
 
-## Project Overview
+## Overview
 
-This repository contains:
+This repo holds a minimal Express server:
 
-* A basic Express server (`index.js`) responding with JSON on `GET /`.
-* A Jest + Supertest test suite (`index.test.js`).
-* A Dockerfile for containerizing the app.
-* GitHub Actions workflows for:
+* Responds to `GET /` with JSON `{ message: 'Hello, CI/CD World!' }`.
+* Includes a Jest/Supertest suite to verify the endpoint.
+* Contains a Dockerfile for containerization.
+* Defines two GitHub Actions workflows:
 
-  * **CI**: building and running tests on each push and PR.
-  * **CD**: building and pushing Docker images to Docker Hub on successful CI.
+  * **CI** (`.github/workflows/ci.yml`): runs lint/install/tests on every push/PR to `main`.
+  * **CD** (`.github/workflows/cd.yml`): builds & pushes a Docker image to Docker Hub on successful CI runs.
+
+---
 
 ## Prerequisites
 
-* Git installed locally.
-* Node.js (v14+) and npm.
-* Docker Desktop.
-* A Docker Hub account.
-* A GitHub repository with repo-level [Secrets](#managing-secrets) configured.
+* [Node.js v14+](https://nodejs.org/) & npm
+* [Git](https://git-scm.com/)
+* Docker Desktop (for local container builds)
+* A GitHub account with this repo forked or cloned
+* A Docker Hub account with a repository named `ci-demo`
 
-## Setup & Installation
+---
 
-1. **Clone** this repo locally:
+## Getting Started
 
-   ```bash
-   git clone https://github.com/<your-username>/ci-demo-node.git
-   cd ci-demo-node
-   ```
+### Clone & Install
 
-2. **Install** dependencies:
+```bash
+git clone https://github.com/ilyassazetd/ci-demo.git
+cd ci-demo
+npm install
+```
 
-   ```bash
-   npm ci
-   ```
-
-## Running Locally
-
-Start the server:
+### Run Locally
 
 ```bash
 npm start
+# → Server listens on http://localhost:3000
 ```
 
-Then visit [http://localhost:3000](http://localhost:3000) to see:
+---
 
-```json
-{ "message": "Hello, CI/CD World!" }
+## Testing
+
+Run the test suite with:
+
+```bash
+npm test
 ```
 
-## Dockerization
+You should see Jest report a passing test for the `/` endpoint.
 
-1. **Build** the image:
+---
+
+## Docker
+
+### Build & Run Locally
+
+1. **Build the image**
 
    ```bash
    ```
 
-docker build -t <dockerhub-user>/ci-demo\:latest .
+docker build -t ilyassazetd/ci-demo\:latest .
 
 ````
 
-2. **Run** the container:
+2. **Run a container**  
    ```bash
-docker run --rm -d -p 3000:3000 --name ci-demo-test <dockerhub-user>/ci-demo:latest
+docker run --rm -d -p 3000:3000 --name ci-demo-test ilyassazetd/ci-demo:latest
 ````
 
-3. **Test**:
+3. **Verify**
 
    ```bash
    ```
 
 curl [http://localhost:3000](http://localhost:3000)
 
+# → { "message": "Hello, CI/CD World!" }
+
 ````
 
-4. **Push** to Docker Hub:
+4. **Cleanup**  
    ```bash
-docker push <dockerhub-user>/ci-demo:latest
+docker stop ci-demo-test
 ````
 
-## Continuous Integration (CI)
-
-Workflow file: `.github/workflows/ci.yml`
-
-* **Triggers**: `push` & `pull_request` on `main`
-* **Jobs**:
-
-  * Checkout code
-  * Set up Node.js 16
-  * Install deps (`npm ci`)
-  * Run tests (`npm test`)
-
-## Continuous Deployment (CD)
-
-Workflow file: `.github/workflows/cd.yml`
-
-* **Trigger**: runs on completion of the CI workflow (`workflow_run`)
-* **Steps**:
-
-  1. Checkout code
-  2. Set up QEMU & Buildx (optional for multi-arch)
-  3. Docker login (uses GitHub Secrets)
-  4. Build and push image tagged `latest` and commit SHA
-
-## Testing
-
-Run tests locally:
+### Push to Docker Hub
 
 ```bash
-npm test
+docker login               # enter Docker Hub username & access token
+docker push ilyassazetd/ci-demo:latest
 ```
 
-Coverage report (optional):
+---
 
-```bash
-jest --coverage
-```
+## CI with GitHub Actions
 
-## Managing Secrets
+The **CI** workflow is defined in `.github/workflows/ci.yml`. It:
 
-In your GitHub repo, add these Secrets under **Settings → Secrets and variables → Actions**:
+1. Triggers on `push` and `pull_request` to `main`.
+2. Checks out code, sets up Node.js v16.
+3. Installs dependencies via `npm ci`.
+4. Runs `npm test` (Jest + Supertest).
 
-* `DOCKERHUB_USERNAME`: your Docker Hub username
-* `DOCKERHUB_TOKEN`: a Docker Hub access token (not your account password)
+*Merges to `main` are gated on passing this workflow.*
 
-## Contributing
+---
 
-1. Fork the repo.
-2. Create a feature branch: `git checkout -b feature/my-feature`
-3. Commit your changes: `git commit -m 'Add some feature'`
-4. Push: `git push origin feature/my-feature`
-5. Open a PR against `main`.
+## CD with GitHub Actions → Docker Hub
 
-## License
+The **CD** workflow is defined in `.github/workflows/cd.yml`. It:
 
-This project is open source, under the MIT License. See [LICENSE](LICENSE) for details.
+1. Listens for the `CI` workflow to complete successfully.
+2. Checks out code, sets up Docker Buildx.
+3. Logs in to Docker Hub using `DOCKERHUB_USERNAME` & `DOCKERHUB_TOKEN` (repo secrets).
+4. Builds and pushes two image tags:
+
+   * `ilyassazetd/ci-demo:latest`
+   * `ilyassazetd/ci-demo:${GITHUB_SHA}`
+
+Make sure you’ve added these two secrets in your GitHub repo settings before pushing.
+
+---
+
+With this setup, every change pushed to `main` automatically runs tests and, on success, produces a fresh Docker image on Docker Hub. Enjoy your automated CI/CD!
